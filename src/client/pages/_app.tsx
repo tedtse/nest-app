@@ -4,6 +4,7 @@ import Head from 'next/head';
 import { Layout, Menu } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
 import 'antd/dist/antd.css';
+import '../public/styles/global.css';
 
 const { Header, Content, Footer, Sider } = Layout;
 
