@@ -1,0 +1,43 @@
+.globalLayout {
+  background-color: #fff;
+  height: 100%;
+}
+
+.loginContainer {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  .submitter {
+    text-align: right;
+  }
+  :global {
+    .ant-card {
+      width: 500px;
+    }
+    .ant-card-body {
+      padding: 48px 24px;
+    }
+  }
+}
+
+.listRegular {
+  padding: 20px;
+}
+
+.siteLayout {
+  background-color: #f0f2f5;
+  :global {
+    .ant-layout-header,
+    .ant-page-header {
+      background-color: #fff;
+    }
+    .ant-layout-content {
+      margin: 20px 20px 0;
+      background-color: #fff;
+    }
+    .ant-layout-footer {
+      text-align: center;
+    }
+  }
+}
