@@ -15,7 +15,7 @@ import {
 import * as antdIcons from '@ant-design/icons';
 // import { ReactSortable } from 'react-sortablejs';
 import StaticWebHeader from '../components/static-web-header';
-import { BackgroundMenu } from '../background.helpers';
+import { BackgroundRoutes } from '../routes';
 import {
   findCategories,
   findAntdIconsList,
@@ -91,7 +91,7 @@ const CategoriesPage: NextPage = () => {
       <Layout className={styles.globalLayout}>
         <Sider breakpoint="lg" collapsedWidth="0">
           <Menu theme="dark" mode="inline" selectedKeys={['categories']}>
-            {BackgroundMenu.map((el) => {
+            {BackgroundRoutes.map((el) => {
               const Icon = antdIcons[el.icon];
               return (
                 <Menu.Item key={el.key} icon={<Icon />}>
