@@ -10,8 +10,8 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { UpdateQuery } from 'mongoose';
-import { HttpExceptionFilter } from '../filters/http-exception.filter';
-import { ResponseInterceptor } from '../filters/transform-interceptor';
+import { HttpExceptionFilter } from '../../filters/http-exception.filter';
+import { ResponseInterceptor } from '../../interceptors/transform-interceptor';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './schemas/user.schema';

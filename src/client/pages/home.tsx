@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useLayoutEffect } from 'react';
 import { Layout, Menu } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
 import StaticWebHeader from './components/static-web-header';
@@ -8,6 +8,15 @@ import styles from './index.module.scss';
 const { Header, Content, Footer, Sider } = Layout;
 
 const Home: React.FC = () => {
+  const [renderable, setRenderable] = useState<boolean>(false);
+  useEffect(() => {
+    setRenderable(true);
+  }, []);
+
+  if (!renderable) {
+    return null;
+  }
+
   return (
     <>
       <StaticWebHeader />

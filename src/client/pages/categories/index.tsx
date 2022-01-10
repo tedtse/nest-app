@@ -33,6 +33,7 @@ const { Content, Footer, Sider } = Layout;
 const { Option, OptGroup } = Select;
 
 const CategoriesPage: NextPage = () => {
+  const [renderable, setRenderable] = useState<boolean>(false);
   const [categories, setCategories] = useState<CategoryType[]>([]);
   const [antdIconsList, setAntdIconsList] = useState<AntdIconsListType[]>([]);
   const [visible, setVisible] = useState<boolean>(false);
@@ -48,6 +49,7 @@ const CategoriesPage: NextPage = () => {
   const [form] = Form.useForm<CategoryType>();
 
   useEffect(() => {
+    setRenderable(true);
     findCategories().then((res) => {
       setCategories(res.data);
     });
@@ -79,6 +81,10 @@ const CategoriesPage: NextPage = () => {
       });
   };
 
+  if (!renderable) {
+    return null;
+  }
+
   return (
     <>
       <StaticWebHeader />
@@ -104,6 +110,7 @@ const CategoriesPage: NextPage = () => {
                 onClick={() => {
                   setFormState('create');
                   setVisible(true);
+                  form?.resetFields();
                 }}
               >
                 新增
@@ -129,6 +136,7 @@ const CategoriesPage: NextPage = () => {
                         onClick={() => {
                           setFormState('update');
                           setVisible(true);
+                          form?.resetFields();
                           form?.setFieldsValue(item);
                         }}
                       >

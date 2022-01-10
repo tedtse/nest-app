@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Category } from './schemas/category.schema';
 
-import type { MongoIDType } from '../../types/model';
+import type { MongoIDType } from '../../../types/model';
 
 @Injectable()
 export class CategoriesService {

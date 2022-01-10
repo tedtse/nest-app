@@ -5,7 +5,7 @@ import * as jwt from 'jsonwebtoken';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './schemas/user.schema';
 
-import type { MongoIDType } from '../../types/model';
+import type { MongoIDType } from '../../../types/model';
 
 @Injectable()
 export class UsersService {

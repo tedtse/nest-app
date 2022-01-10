@@ -10,8 +10,8 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { UpdateQuery } from 'mongoose';
-import { HttpExceptionFilter } from '../filters/http-exception.filter';
-import { ResponseInterceptor } from '../filters/transform-interceptor';
+import { HttpExceptionFilter } from '../../filters/http-exception.filter';
+import { ResponseInterceptor } from '../../interceptors/transform-interceptor';
 import { CategoriesService } from './categories.service';
 import { Category } from './schemas/category.schema';
 
