@@ -1,7 +1,7 @@
 import React from 'react';
 import { NextPage } from 'next';
 import { Card, Form, Button, Input, Space, message } from 'antd';
-import StaticWebHeader from '../components/static-web-header';
+import StaticWebHeader from '../../components/static-web-header';
 import { login } from './service';
 
 import styles from '../index.module.scss';

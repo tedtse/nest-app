@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useLayoutEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Layout, Menu } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
-import StaticWebHeader from './components/static-web-header';
+import StaticWebHeader from '../../components/static-web-header';
 
-import styles from './index.module.scss';
+import styles from '../index.module.scss';
 
 const { Header, Content, Footer, Sider } = Layout;
 

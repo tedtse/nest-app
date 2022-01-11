@@ -1,7 +1,7 @@
 import { extend, ResponseError } from 'umi-request';
 import { message } from 'antd';
 
-import type { ResponseJsonType } from '../../common/request';
+import type { ResponseJsonType } from '../../types/request';
 
 class ResError extends Error {
   response: Response;
@@ -35,10 +35,8 @@ extendRequest.interceptors.request.use((url, options) => {
   return {
     url,
     options: {
-      ...{
-        headers: {
-          'Content-Type': 'application/json; charset=utf-8',
-        },
+      headers: {
+        'Content-Type': 'application/json; charset=utf-8',
       },
       ...options,
     },

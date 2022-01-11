@@ -12,12 +12,14 @@ export class CategoriesService {
   ) {}
 
   async create(category: Category) {
+    const counts = await this.categoryModel.count();
     const createCategory = new this.categoryModel(category);
+    createCategory.sort = counts + 1;
     return createCategory.save();
   }
 
-  async findAll() {
-    return this.categoryModel.find();
+  async findAll(options = {}) {
+    return this.categoryModel.find({}, null, options);
   }
 
   async findById(_id: MongoIDType) {
@@ -31,7 +33,26 @@ export class CategoriesService {
   }
 
   async findByIdAndRemove(_id: MongoIDType) {
-    await this.categoryModel.findByIdAndRemove(_id);
+    const removeCategory = await this.categoryModel.findByIdAndRemove(_id);
+    const needUpdateCategories = await this.categoryModel.find({
+      sort: { $gt: removeCategory.sort },
+    });
+    needUpdateCategories.forEach(async (category) => {
+      category.sort = category.sort - 1;
+      await category.save();
+    });
     return null;
+  }
+
+  async sort(targets: Category[]) {
+    const sources = await this.categoryModel.find();
+    sources.forEach(async (sou) => {
+      const tar = targets.find((el) => el._id === sou._id);
+      if (tar.sort !== sou.sort) {
+        sou.sort = tar.sort;
+        await sou.save();
+      }
+    });
+    return sources;
   }
 }

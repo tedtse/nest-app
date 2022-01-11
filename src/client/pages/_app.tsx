@@ -1,5 +1,5 @@
 import 'antd/dist/antd.css';
-import '/public/global.scss';
+import '../assets/global.scss';
 
 function App({ Component, pageProps }) {
   return <Component {...pageProps} />;

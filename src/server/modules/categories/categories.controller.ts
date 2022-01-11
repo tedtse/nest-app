@@ -1,6 +1,7 @@
 import {
   Body,
   Param,
+  Query,
   Controller,
   Get,
   Post,
@@ -27,8 +28,8 @@ export class CategoriesController {
   }
 
   @Get()
-  async findAll(): Promise<Category[]> {
-    return this.categoriesService.findAll();
+  async findAll(@Query('sort') sort): Promise<Category[]> {
+    return this.categoriesService.findAll({ sort: JSON.parse(sort ?? '{}') });
   }
 
   @Get(':id')
@@ -44,5 +45,10 @@ export class CategoriesController {
   @Delete(':id')
   async findByIdAndRemove(@Param() { id }) {
     return this.categoriesService.findByIdAndRemove(id);
+  }
+
+  @Put('sort')
+  async sort(@Body() targets: Category[]) {
+    return this.categoriesService.sort(targets);
   }
 }

@@ -11,10 +11,14 @@ import {
   Input,
   Select,
   message,
+  Drawer,
 } from 'antd';
 import * as antdIcons from '@ant-design/icons';
-// import { ReactSortable } from 'react-sortablejs';
-import StaticWebHeader from '../components/static-web-header';
+import { SortableContainer, SortableElement } from 'react-sortable-hoc';
+import { arrayMoveImmutable } from 'array-move';
+import classNames from 'classnames/bind';
+import isEqual from 'lodash/isEqual';
+import StaticWebHeader from '../../components/static-web-header';
 import { BackgroundRoutes } from '../routes';
 import {
   findCategories,
@@ -31,12 +35,16 @@ import type { FormStateType, AntdIconsListType } from '../types';
 
 const { Content, Footer, Sider } = Layout;
 const { Option, OptGroup } = Select;
+const styleCtx = classNames.bind(styles);
 
 const CategoriesPage: NextPage = () => {
   const [renderable, setRenderable] = useState<boolean>(false);
   const [categories, setCategories] = useState<CategoryType[]>([]);
+  const [categoriesCache, setCategoriesCache] = useState<CategoryType[]>([]);
   const [antdIconsList, setAntdIconsList] = useState<AntdIconsListType[]>([]);
   const [visible, setVisible] = useState<boolean>(false);
+  const [drawervisible, setDrawerVisible] = useState<boolean>(false);
+  const [sorted, setSorted] = useState<boolean>(false);
   const [formState, setFormState] = useState<FormStateType>();
   const modalTitle = useMemo(() => {
     const map = {
@@ -52,6 +60,7 @@ const CategoriesPage: NextPage = () => {
     setRenderable(true);
     findCategories().then((res) => {
       setCategories(res.data);
+      setCategoriesCache(res.data);
     });
     findAntdIconsList().then((res) => {
       setAntdIconsList(res);
@@ -67,6 +76,7 @@ const CategoriesPage: NextPage = () => {
       })
       .then((res) => {
         setCategories(res.data);
+        setCategoriesCache(res.data);
       });
   };
   const handleUpdateCategory = async (json: CategoryType) => {
@@ -78,8 +88,77 @@ const CategoriesPage: NextPage = () => {
       })
       .then((res) => {
         setCategories(res.data);
+        setCategoriesCache(res.data);
       });
   };
+
+  const SortableItem = SortableElement(({ value }) => {
+    const Icon = antdIcons[value.icon];
+    return (
+      <List.Item
+        key={String(value._id)}
+        actions={[
+          <a
+            key="edit"
+            onClick={() => {
+              setFormState('update');
+              setVisible(true);
+              form?.resetFields();
+              form?.setFieldsValue(value);
+            }}
+          >
+            编辑
+          </a>,
+          <a
+            key="remove"
+            onClick={() => {
+              const ExclamationIcon = antdIcons.ExclamationCircleOutlined;
+              Modal.confirm({
+                icon: <ExclamationIcon />,
+                content: '确定要删除吗?',
+                onOk: () => {
+                  removeCategory(value._id)
+                    .then(() => {
+                      message.success('删除成功');
+                      setVisible(false);
+                      return findCategories();
+                    })
+                    .then((res) => {
+                      setCategories(res.data);
+                      setCategoriesCache(res.data);
+                    });
+                },
+              });
+            }}
+          >
+            删除
+          </a>,
+        ]}
+      >
+        <List.Item.Meta
+          avatar={<Icon />}
+          title={value.name}
+          description={value.description}
+        />
+      </List.Item>
+    );
+  });
+
+  const SortableList = SortableContainer(
+    ({ items }: { items: CategoryType[] }) => {
+      return (
+        <List
+          className={styles.listRegular}
+          dataSource={items}
+          renderItem={(item, index) => {
+            return (
+              <SortableItem key={String(item._id)} index={index} value={item} />
+            );
+          }}
+        />
+      );
+    },
+  );
 
   if (!renderable) {
     return null;
@@ -101,7 +180,7 @@ const CategoriesPage: NextPage = () => {
             })}
           </Menu>
         </Sider>
-        <Layout className={styles.siteLayout}>
+        <Layout className={styleCtx('workspaceLayout', { fixed: sorted })}>
           <PageHeader
             extra={[
               <Button
@@ -118,65 +197,37 @@ const CategoriesPage: NextPage = () => {
             ]}
           />
           <Content>
-            {/* <ReactSortable<CategoryType>
-              list={categories}
-              setList={setCategories}
-            ></ReactSortable> */}
-            <List
-              className={styles.listRegular}
-              dataSource={categories}
-              renderItem={(item) => {
-                const Icon = antdIcons[item.icon];
-                return (
-                  <List.Item
-                    key={String(item._id)}
-                    actions={[
-                      <a
-                        key="edit"
-                        onClick={() => {
-                          setFormState('update');
-                          setVisible(true);
-                          form?.resetFields();
-                          form?.setFieldsValue(item);
-                        }}
-                      >
-                        编辑
-                      </a>,
-                      <a
-                        key="remove"
-                        onClick={() => {
-                          const ExclamationIcon =
-                            antdIcons.ExclamationCircleOutlined;
-                          Modal.confirm({
-                            icon: <ExclamationIcon />,
-                            content: '确定要删除吗?',
-                            onOk: () => {
-                              removeCategory(item._id)
-                                .then(() => {
-                                  message.success('删除成功');
-                                  setVisible(false);
-                                  return findCategories();
-                                })
-                                .then((res) => {
-                                  setCategories(res.data);
-                                });
-                            },
-                          });
-                        }}
-                      >
-                        删除
-                      </a>,
-                    ]}
-                  >
-                    <List.Item.Meta
-                      avatar={<Icon />}
-                      title={item.name}
-                      description={item.description}
-                    />
-                  </List.Item>
+            <SortableList
+              distance={10}
+              items={categories}
+              onSortEnd={({ oldIndex, newIndex }) => {
+                const result = arrayMoveImmutable(
+                  categories,
+                  oldIndex,
+                  newIndex,
                 );
+                setCategories(result);
+                if (!isEqual(result, categoriesCache)) {
+                  setSorted(true);
+                  setDrawerVisible(true);
+                } else {
+                  setSorted(false);
+                  setDrawerVisible(false);
+                }
               }}
             />
+            <Drawer
+              className={styles.fixedDrawer}
+              visible={drawervisible}
+              placement="bottom"
+              height={styles.wsFixedHeght}
+              mask={false}
+              closable={false}
+              getContainer={false}
+              style={{ position: 'absolute' }}
+            >
+              <Button type="primary">确定</Button>
+            </Drawer>
           </Content>
           <Footer>Ant Design ©2018 Created by Ant UED</Footer>
         </Layout>
@@ -223,7 +274,7 @@ const CategoriesPage: NextPage = () => {
                     const Icon = antdIcons[icon];
                     return (
                       <Option key={icon} value={icon}>
-                        {icon} <Icon />
+                        <Icon /> {icon}
                       </Option>
                     );
                   })}

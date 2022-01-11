@@ -1,11 +1,14 @@
 import request from '../../utils/request';
 
-import type { ResponseJsonType, MongoIDType } from '../../../types/request';
+import type { ResponseJsonType } from '../../../types/request';
+import type { MongoIDType } from '../../../types/model';
 import type { AntdIconsListType } from '../types';
 import type { CategoryType } from './data';
 
-export async function findCategories() {
-  return request.get<ResponseJsonType>('/api/categories');
+export async function findCategories(
+  options = { params: { sort: '{ "sort": 1 }' } },
+) {
+  return request.get<ResponseJsonType>('/api/categories', options);
 }
 
 export async function createCategory(instance: CategoryType) {
