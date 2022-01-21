@@ -8,19 +8,32 @@ import type { CategoryType } from './data';
 export async function findCategories(
   options = { params: { sort: '{ "sort": 1 }' } },
 ) {
-  return request.get<ResponseJsonType>('/api/categories', options);
+  return request.get<ResponseJsonType<CategoryType[]>>(
+    '/api/categories',
+    options,
+  );
 }
 
 export async function createCategory(instance: CategoryType) {
-  return request.post<ResponseJsonType>('/api/categories', { data: instance });
+  return request.post<ResponseJsonType<CategoryType>>('/api/categories', {
+    data: instance,
+  });
 }
 
 export async function updateCategory(instance: CategoryType) {
-  return request.put<ResponseJsonType>('/api/categories', { data: instance });
+  return request.put<ResponseJsonType<CategoryType>>('/api/categories', {
+    data: instance,
+  });
 }
 
 export async function removeCategory(id: MongoIDType) {
   return request.delete<ResponseJsonType>(`/api/categories/${id}`);
+}
+
+export async function sortCategories(targets: CategoryType[]) {
+  return request.put<ResponseJsonType<CategoryType[]>>('/api/categories/sort', {
+    data: targets,
+  });
 }
 
 export async function findAntdIconsList(): Promise<AntdIconsListType[]> {

@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Category } from './schemas/category.schema';
 
-import type { MongoIDType } from '../../../types/model';
+import type { MongoIDType } from '#types/model';
 
 @Injectable()
 export class CategoriesService {
@@ -46,10 +46,10 @@ export class CategoriesService {
 
   async sort(targets: Category[]) {
     const sources = await this.categoryModel.find();
-    sources.forEach(async (sou) => {
-      const tar = targets.find((el) => el._id === sou._id);
-      if (tar.sort !== sou.sort) {
-        sou.sort = tar.sort;
+    targets.forEach(async (tar, index) => {
+      const sou = sources.find((el) => el._id.toJSON() === tar._id);
+      if (sou.sort !== index + 1) {
+        sou.sort = index + 1;
         await sou.save();
       }
     });

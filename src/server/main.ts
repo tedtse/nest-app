@@ -5,7 +5,7 @@ import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
-  app.useStaticAssets(path.resolve(__dirname, '..', 'public'), {
+  app.useStaticAssets(path.resolve(process.cwd(), 'static'), {
     prefix: '/static/',
   });
   // const app = await NestFactory.create(AppModule);

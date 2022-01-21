@@ -1,4 +1,5 @@
 import {
+  Headers,
   Body,
   Param,
   Controller,
@@ -8,15 +9,18 @@ import {
   Delete,
   UseFilters,
   UseInterceptors,
+  UseGuards,
 } from '@nestjs/common';
 import { UpdateQuery } from 'mongoose';
-import { HttpExceptionFilter } from '../../filters/http-exception.filter';
-import { ResponseInterceptor } from '../../interceptors/transform-interceptor';
+import { AuthGuard, NoAuth } from '@server/guards/auth.guard';
+import { HttpExceptionFilter } from '@server/filters/http-exception.filter';
+import { ResponseInterceptor } from '@server/interceptors/transform-interceptor';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './schemas/user.schema';
 
 @Controller('api/users')
+@UseGuards(AuthGuard)
 @UseFilters(HttpExceptionFilter)
 @UseInterceptors(new ResponseInterceptor())
 export class UsersController {
@@ -32,6 +36,12 @@ export class UsersController {
     return this.usersService.findAll();
   }
 
+  @Get('current')
+  @NoAuth()
+  async findCurrentUser(@Headers() { token }) {
+    return this.usersService.findCurrentUser(token);
+  }
+
   @Get(':id')
   async findById(@Param() { id }): Promise<User> {
     return this.usersService.findById(id);
@@ -45,10 +55,5 @@ export class UsersController {
   @Delete(':id')
   async findByIdAndRemove(@Param() { id }) {
     return this.usersService.findByIdAndRemove(id);
-  }
-
-  @Post('login')
-  async login(@Body() { username, password }) {
-    return this.usersService.login(username, password);
   }
 }

@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { NextPage } from 'next';
 import {
   Layout,
-  Menu,
   List,
   PageHeader,
   Button,
@@ -11,31 +10,30 @@ import {
   Input,
   Select,
   message,
-  Drawer,
 } from 'antd';
 import * as antdIcons from '@ant-design/icons';
 import { SortableContainer, SortableElement } from 'react-sortable-hoc';
 import { arrayMoveImmutable } from 'array-move';
-import classNames from 'classnames/bind';
 import isEqual from 'lodash/isEqual';
 import StaticWebHeader from '../../components/static-web-header';
-import { BackgroundRoutes } from '../routes';
+import BasicLayout from '../../components/basic-layout';
+import BgMenu from '../../components/basic-layout/bg-menu';
 import {
   findCategories,
   findAntdIconsList,
   createCategory,
   updateCategory,
   removeCategory,
+  sortCategories,
 } from './service';
 
-import styles from '../index.module.scss';
+import styles from '../../assets/index.module.scss';
 
 import type { CategoryType } from './data';
 import type { FormStateType, AntdIconsListType } from '../types';
 
-const { Content, Footer, Sider } = Layout;
+const { Content } = Layout;
 const { Option, OptGroup } = Select;
-const styleCtx = classNames.bind(styles);
 
 const CategoriesPage: NextPage = () => {
   const [renderable, setRenderable] = useState<boolean>(false);
@@ -43,7 +41,6 @@ const CategoriesPage: NextPage = () => {
   const [categoriesCache, setCategoriesCache] = useState<CategoryType[]>([]);
   const [antdIconsList, setAntdIconsList] = useState<AntdIconsListType[]>([]);
   const [visible, setVisible] = useState<boolean>(false);
-  const [drawervisible, setDrawerVisible] = useState<boolean>(false);
   const [sorted, setSorted] = useState<boolean>(false);
   const [formState, setFormState] = useState<FormStateType>();
   const modalTitle = useMemo(() => {
@@ -120,7 +117,6 @@ const CategoriesPage: NextPage = () => {
                   removeCategory(value._id)
                     .then(() => {
                       message.success('删除成功');
-                      setVisible(false);
                       return findCategories();
                     })
                     .then((res) => {
@@ -167,22 +163,32 @@ const CategoriesPage: NextPage = () => {
   return (
     <>
       <StaticWebHeader />
-      <Layout className={styles.globalLayout}>
-        <Sider breakpoint="lg" collapsedWidth="0">
-          <Menu theme="dark" mode="inline" selectedKeys={['categories']}>
-            {BackgroundRoutes.map((el) => {
-              const Icon = antdIcons[el.icon];
-              return (
-                <Menu.Item key={el.key} icon={<Icon />}>
-                  {el.title}
-                </Menu.Item>
-              );
-            })}
-          </Menu>
-        </Sider>
-        <Layout className={styleCtx('workspaceLayout', { fixed: sorted })}>
+      <BasicLayout
+        menuRender={<BgMenu route="categories" />}
+        headRender={
           <PageHeader
             extra={[
+              ...(sorted
+                ? [
+                    <Button
+                      key="sort"
+                      type="primary"
+                      onClick={() => {
+                        sortCategories(categories)
+                          .then(() => {
+                            message.success('保存成功');
+                            return findCategories();
+                          })
+                          .then((res) => {
+                            setCategories(res.data);
+                            setCategoriesCache(res.data);
+                          });
+                      }}
+                    >
+                      保存排序
+                    </Button>,
+                  ]
+                : []),
               <Button
                 key="new"
                 type="primary"
@@ -196,6 +202,8 @@ const CategoriesPage: NextPage = () => {
               </Button>,
             ]}
           />
+        }
+        contentRender={
           <Content>
             <SortableList
               distance={10}
@@ -209,29 +217,14 @@ const CategoriesPage: NextPage = () => {
                 setCategories(result);
                 if (!isEqual(result, categoriesCache)) {
                   setSorted(true);
-                  setDrawerVisible(true);
                 } else {
                   setSorted(false);
-                  setDrawerVisible(false);
                 }
               }}
             />
-            <Drawer
-              className={styles.fixedDrawer}
-              visible={drawervisible}
-              placement="bottom"
-              height={styles.wsFixedHeght}
-              mask={false}
-              closable={false}
-              getContainer={false}
-              style={{ position: 'absolute' }}
-            >
-              <Button type="primary">确定</Button>
-            </Drawer>
           </Content>
-          <Footer>Ant Design ©2018 Created by Ant UED</Footer>
-        </Layout>
-      </Layout>
+        }
+      />
       <Modal
         title={modalTitle}
         visible={visible}

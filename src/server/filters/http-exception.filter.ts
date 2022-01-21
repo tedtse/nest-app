@@ -6,7 +6,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import type { ResponseJsonType } from '../../types/request';
+import type { ResponseJsonType } from '#types/request';
 
 @Catch()
 export class HttpExceptionFilter<HttpException> implements ExceptionFilter {
@@ -20,10 +20,28 @@ export class HttpExceptionFilter<HttpException> implements ExceptionFilter {
       (exception as any).message.error ||
       null;
 
-    const status =
-      exception instanceof HttpException
-        ? exception.getStatus()
-        : HttpStatus.INTERNAL_SERVER_ERROR;
+    const statusMaps = [
+      {
+        rule: () => exception instanceof HttpException,
+        result: () => (exception as any).getStatus(),
+      },
+      {
+        rule: () => (exception as any).name === 'ValidationError',
+        result: () => HttpStatus.BAD_REQUEST,
+      },
+      {
+        rule: () => true,
+        result: () => HttpStatus.INTERNAL_SERVER_ERROR,
+      },
+    ];
+    let status: number;
+    statusMaps.some(({ rule, result }) => {
+      if (rule()) {
+        status = result();
+        return true;
+      }
+      return false;
+    });
     const url = request.originalUrl;
 
     const errorResponse: ResponseJsonType = {

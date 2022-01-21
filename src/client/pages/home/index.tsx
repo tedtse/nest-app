@@ -1,16 +1,27 @@
 import React, { useState, useEffect } from 'react';
+import { NextPage } from 'next';
 import { Layout, Menu } from 'antd';
-import { UserOutlined } from '@ant-design/icons';
+import * as antdIcons from '@ant-design/icons';
+import BasicLayout from '../../components/basic-layout';
+import CategoriesList from './components/categories-list';
 import StaticWebHeader from '../../components/static-web-header';
+import { findCategories } from '../categories/service';
+import scrollTo from '../../utils/scrollTo';
+import styles from '../../assets/index.module.scss';
 
-import styles from '../index.module.scss';
+import type { CategoryType } from '../categories/data';
 
-const { Header, Content, Footer, Sider } = Layout;
+const { Content } = Layout;
 
-const Home: React.FC = () => {
+const Home: NextPage = () => {
   const [renderable, setRenderable] = useState<boolean>(false);
+  const [categories, setCategories] = useState<CategoryType[]>([]);
+  const [workspaceContent, setWorkspaceContent] = useState<Element>();
   useEffect(() => {
     setRenderable(true);
+    findCategories().then((res) => {
+      setCategories(res.data);
+    });
   }, []);
 
   if (!renderable) {
@@ -20,15 +31,49 @@ const Home: React.FC = () => {
   return (
     <>
       <StaticWebHeader />
-      <Layout className={styles.globalLayout}>
-        <Sider breakpoint="lg" collapsedWidth="0">
+      <BasicLayout
+        menuRender={
           <Menu theme="dark" mode="inline">
-            <Menu.Item key="1" icon={<UserOutlined />}>
-              nav 1
-            </Menu.Item>
+            {categories.map((el) => {
+              const Icon = antdIcons[el.icon];
+              return (
+                <Menu.Item key={el._id} icon={<Icon />}>
+                  <a
+                    onClick={() => {
+                      const handle = (content?: HTMLElement) => {
+                        const target = (
+                          content || workspaceContent
+                        ).querySelector(`#category_${el._id}`) as HTMLElement;
+                        scrollTo(
+                          target,
+                          content || (workspaceContent as HTMLElement),
+                          { threshold: 10 },
+                        );
+                      };
+                      if (!workspaceContent) {
+                        const content = document.body.querySelector(
+                          '#workspace-content',
+                        ) as HTMLElement;
+                        setWorkspaceContent(content);
+                        handle(content);
+                        return;
+                      }
+                      handle();
+                    }}
+                  >
+                    {el.name}
+                  </a>
+                </Menu.Item>
+              );
+            })}
           </Menu>
-        </Sider>
-      </Layout>
+        }
+        contentRender={
+          <Content id="workspace-content" className={styles.sitesContainer}>
+            <CategoriesList categories={categories} />
+          </Content>
+        }
+      />
     </>
   );
 };

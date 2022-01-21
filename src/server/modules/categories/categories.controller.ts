@@ -9,14 +9,17 @@ import {
   Delete,
   UseFilters,
   UseInterceptors,
+  UseGuards,
 } from '@nestjs/common';
 import { UpdateQuery } from 'mongoose';
-import { HttpExceptionFilter } from '../../filters/http-exception.filter';
-import { ResponseInterceptor } from '../../interceptors/transform-interceptor';
+import { AuthGuard, NoAuth } from '@server/guards/auth.guard';
+import { HttpExceptionFilter } from '@server/filters/http-exception.filter';
+import { ResponseInterceptor } from '@server/interceptors/transform-interceptor';
 import { CategoriesService } from './categories.service';
 import { Category } from './schemas/category.schema';
 
 @Controller('api/categories')
+@UseGuards(AuthGuard)
 @UseFilters(HttpExceptionFilter)
 @UseInterceptors(new ResponseInterceptor())
 export class CategoriesController {
@@ -28,11 +31,13 @@ export class CategoriesController {
   }
 
   @Get()
+  @NoAuth()
   async findAll(@Query('sort') sort): Promise<Category[]> {
     return this.categoriesService.findAll({ sort: JSON.parse(sort ?? '{}') });
   }
 
   @Get(':id')
+  @NoAuth()
   async findById(@Param() { id }): Promise<Category> {
     return this.categoriesService.findById(id);
   }

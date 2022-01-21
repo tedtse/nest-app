@@ -1,17 +1,33 @@
 import { Model, UpdateQuery } from 'mongoose';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import * as jwt from 'jsonwebtoken';
 import { CreateUserDto } from './dto/create-user.dto';
 import { User } from './schemas/user.schema';
+import { AuthService } from '@server/modules/auth/auth.service';
+import { jwtConstants } from '@server/constants';
 
-import type { MongoIDType } from '../../../types/model';
+import type { MongoIDType } from '#types/model';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<User>,
-  ) {}
+    @Inject(forwardRef(() => AuthService))
+    private readonly authService: AuthService,
+  ) {
+    this.userModel.count((err, count) => {
+      if (err) throw err;
+      if (!count) {
+        const createUser = new this.userModel({
+          name: 'admin',
+          password: 'admin',
+          email: 'admin@xxx.com',
+        });
+        createUser.save();
+      }
+    });
+  }
 
   async create(createUserDto: CreateUserDto) {
     const createUser = new this.userModel(createUserDto);
@@ -41,24 +57,20 @@ export class UsersService {
     return null;
   }
 
-  async login(search: string, password: string) {
-    const user = await this.userModel.findOne({
-      $or: [{ name: search }, { email: search }],
-    });
-    if (!user) {
-      throw new NotFoundException('不存在该用户名或邮箱');
+  async findCurrentUser(token: string) {
+    let decode: any;
+    try {
+      decode = jwt.verify(token, jwtConstants.secret);
+    } catch (err) {
+      return null;
     }
-    if (user.password !== password) {
-      throw new NotFoundException('用户名或密码不对');
-    }
-    const _user = user.toJSON();
-    delete _user.password;
-    const token = jwt.sign(_user, 'secretkey', {
-      expiresIn: '8h',
-    });
-    return {
-      ..._user,
+    const blackToken = await this.authService.findBlackToken({
       token,
-    };
+      userId: decode._id,
+    });
+    if (blackToken) {
+      return null;
+    }
+    return this.findById(decode._id);
   }
 }

@@ -4,6 +4,9 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from './modules/users/users.module';
 import { CategoriesModule } from './modules/categories/categories.module';
+import { SitesModule } from './modules/sites/sites.module';
+import { FilesModule } from './modules/files/files.module';
+import { AuthModule } from './modules/auth/auth.module';
 import { ViewsModule } from './modules/views/views.module';
 
 @Module({
@@ -12,6 +15,9 @@ import { ViewsModule } from './modules/views/views.module';
     ViewsModule,
     UsersModule,
     CategoriesModule,
+    SitesModule,
+    FilesModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

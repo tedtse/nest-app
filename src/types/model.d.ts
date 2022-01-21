@@ -1,3 +1,3 @@
-import type { AnyObject, FlattenMaps } from 'mongoose';
+import { Schema } from 'mongoose';
 
-export type MongoIDType = AnyObject | FlattenMaps<any>;
+export type MongoIDType = Schema.Types.ObjectId;

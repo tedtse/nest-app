@@ -14,7 +14,7 @@ const StaticWebHeader: React.FC<HeaderProps> = (props) => {
         name="description"
         content={props.description ?? 'description of Nest App'}
       />
-      <link rel="shortcut icon" href="/static/favicon.ico" />
+      <link rel="shortcut icon" href="favicon.ico" />
     </Head>
   );
 };
