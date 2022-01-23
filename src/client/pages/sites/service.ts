@@ -36,6 +36,8 @@ export async function sortSites(categoryId: string, targets: SiteType[]) {
 export async function uploadLogo(formData: FormData) {
   return request.post<ResponseJsonType>('/api/files/upload', {
     data: formData,
-    headers: {},
+    headers: {
+      'Content-Type': undefined,
+    },
   });
 }

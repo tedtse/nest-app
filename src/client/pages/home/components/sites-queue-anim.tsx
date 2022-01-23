@@ -45,7 +45,7 @@ const SitesQueueAnim: React.FC<SitesQueueAnimProps> = ({ category }) => {
       }}
     >
       {sites.map((item) => (
-        <Col key={item._id} span={8}>
+        <Col key={item._id} xs={24} sm={24} md={12} lg={8} xl={6}>
           <Card key={item._id}>
             <Card.Meta
               avatar={

@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import { Layout, Space, Button, message } from 'antd';
 import { LoginOutlined, LogoutOutlined } from '@ant-design/icons';
 import classNames from 'classnames/bind';
+import Loading from '../loading';
 import { logout, getCurrentUser } from '../../common/auth/service';
 import { RouteWhiteList } from '../../common/auth/helper';
 import styles from '../../assets/index.module.scss';
@@ -43,14 +44,16 @@ const BasicLayout: React.FC<BasicLayoutProps> = ({
           setRenderable(true);
         } else {
           message.error('请先登录');
-          router.push('/auth/login');
+          router.push(
+            `/auth/login?directUrl=${encodeURIComponent(window.location.href)}`,
+          );
         }
       });
     }
   }, []);
 
   if (!renderable) {
-    return null;
+    return <Loading />;
   }
 
   return (
@@ -64,8 +67,12 @@ const BasicLayout: React.FC<BasicLayoutProps> = ({
         onCollapse={setCollapsed}
       >
         <div className={styles.siderHeader}>
-          <img src="/logo.svg" />
-          <h3>Navigator</h3>
+          <a href="/">
+            <img src="/logo.svg" />
+          </a>
+          <h3>
+            <a href="/">Navigator</a>
+          </h3>
         </div>
         {menuRender}
       </Sider>

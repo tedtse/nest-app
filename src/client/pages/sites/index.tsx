@@ -14,6 +14,7 @@ import {
   Col,
   Card,
   Avatar,
+  Empty,
 } from 'antd';
 import * as antdIcons from '@ant-design/icons';
 import { SortableContainer, SortableElement } from 'react-sortable-hoc';
@@ -22,6 +23,7 @@ import isEqual from 'lodash/isEqual';
 import StaticWebHeader from '../../components/static-web-header';
 import BasicLayout from '../../components/basic-layout';
 import BgMenu from '../../components/basic-layout/bg-menu';
+import Loading from '../../components/loading';
 import { findCategories } from '../categories/service';
 import {
   findSites,
@@ -63,11 +65,21 @@ const SitePage: NextPage = () => {
     };
     return map[formState] ?? '';
   }, [formState]);
+  const emptyDesc = useMemo(() => {
+    if (categories.length) {
+      return undefined;
+    } else {
+      return (
+        <p>
+          还没有网站分类，<a href="/categories">去创建</a>
+        </p>
+      );
+    }
+  }, [categories]);
   const [form] = Form.useForm<SiteType & { logoFile?: any }>();
 
   useEffect(() => {
     setRenderable(true);
-
     findCategories().then((res) => {
       setCategories(res.data);
       if (res.data.length) {
@@ -115,7 +127,7 @@ const SitePage: NextPage = () => {
   };
 
   const SortableItem = SortableElement(({ value }) => (
-    <Col span={8}>
+    <Col xs={24} sm={24} md={12} lg={8} xl={6}>
       <Card
         key={value._id}
         actions={[
@@ -185,7 +197,7 @@ const SitePage: NextPage = () => {
   };
 
   if (!renderable) {
-    return null;
+    return <Loading />;
   }
 
   return (
@@ -244,22 +256,30 @@ const SitePage: NextPage = () => {
           />
         }
         contentRender={
-          <Content className={styles.sitesContainer}>
-            <SortableList
-              axis="xy"
-              distance={10}
-              items={sites}
-              onSortEnd={({ oldIndex, newIndex }) => {
-                const result = arrayMoveImmutable(sites, oldIndex, newIndex);
-                setSites(result);
-                if (!isEqual(result, sitesCache)) {
-                  setSorted(true);
-                } else {
-                  setSorted(false);
-                }
-              }}
-            />
-          </Content>
+          sites.length ? (
+            <Content className={styles.sitesContainer}>
+              <SortableList
+                axis="xy"
+                distance={10}
+                items={sites}
+                onSortEnd={({ oldIndex, newIndex }) => {
+                  const result = arrayMoveImmutable(sites, oldIndex, newIndex);
+                  setSites(result);
+                  if (!isEqual(result, sitesCache)) {
+                    setSorted(true);
+                  } else {
+                    setSorted(false);
+                  }
+                }}
+              />
+            </Content>
+          ) : (
+            <Content className={styles.sitesContainer}>
+              <div className={styles.fullCenter}>
+                <Empty description={emptyDesc} />
+              </div>
+            </Content>
+          )
         }
       />
       <Modal

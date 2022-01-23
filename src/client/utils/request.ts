@@ -47,15 +47,23 @@ const extendRequest = extend({
 });
 
 extendRequest.interceptors.request.use((url, options) => {
+  const defaultHeaders = {
+    'Content-Type': 'application/json; charset=utf-8',
+    token: window.localStorage.getItem('token'),
+  };
+  for (let [k, v] of Object.entries(defaultHeaders)) {
+    if (options.headers.hasOwnProperty(k) && options.headers[k] === undefined) {
+      delete defaultHeaders[k];
+      delete options.headers[k];
+    } else {
+      defaultHeaders[k] = v;
+    }
+  }
   return {
     url,
     options: merge(
-      {},
       {
-        headers: {
-          'Content-Type': 'application/json; charset=utf-8',
-          token: window.localStorage.getItem('token'),
-        },
+        headers: defaultHeaders,
       },
       options,
     ),

@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { NextPage } from 'next';
-import { Layout, Menu } from 'antd';
+import { NextPage, Link } from 'next';
+import { Layout, Menu, Empty } from 'antd';
 import * as antdIcons from '@ant-design/icons';
 import BasicLayout from '../../components/basic-layout';
 import CategoriesList from './components/categories-list';
 import StaticWebHeader from '../../components/static-web-header';
+import Loading from '../../components/loading';
 import { findCategories } from '../categories/service';
 import scrollTo from '../../utils/scrollTo';
 import styles from '../../assets/index.module.scss';
@@ -25,7 +26,7 @@ const Home: NextPage = () => {
   }, []);
 
   if (!renderable) {
-    return null;
+    return <Loading />;
   }
 
   return (
@@ -69,9 +70,23 @@ const Home: NextPage = () => {
           </Menu>
         }
         contentRender={
-          <Content id="workspace-content" className={styles.sitesContainer}>
-            <CategoriesList categories={categories} />
-          </Content>
+          categories.length ? (
+            <Content id="workspace-content" className={styles.sitesContainer}>
+              <CategoriesList categories={categories} />
+            </Content>
+          ) : (
+            <Content className={styles.sitesContainer}>
+              <div className={styles.fullCenter}>
+                <Empty
+                  description={
+                    <p>
+                      还没有网站分类，<a href="/categories">去创建</a>
+                    </p>
+                  }
+                />
+              </div>
+            </Content>
+          )
         }
       />
     </>

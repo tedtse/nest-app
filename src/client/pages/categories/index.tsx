@@ -18,6 +18,7 @@ import isEqual from 'lodash/isEqual';
 import StaticWebHeader from '../../components/static-web-header';
 import BasicLayout from '../../components/basic-layout';
 import BgMenu from '../../components/basic-layout/bg-menu';
+import Loading from '../../components/loading';
 import {
   findCategories,
   findAntdIconsList,
@@ -157,7 +158,7 @@ const CategoriesPage: NextPage = () => {
   );
 
   if (!renderable) {
-    return null;
+    return <Loading />;
   }
 
   return (

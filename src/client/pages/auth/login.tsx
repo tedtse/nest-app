@@ -1,15 +1,35 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { NextPage } from 'next';
+import qs from 'qs';
 import { useRouter } from 'next/router';
 import { Card, Form, Button, Input, Space, message } from 'antd';
 import StaticWebHeader from '../../components/static-web-header';
-import { login } from './service';
+import Loading from '../../components/loading';
+import { login, getCurrentUser } from './service';
 
 import styles from '../../assets/index.module.scss';
 
 const LoginPage: NextPage = () => {
+  const [renderable, setRenderable] = useState<boolean>(false);
   const [form] = Form.useForm();
   const router = useRouter();
+  useEffect(() => {
+    getCurrentUser()
+      .then((res) => {
+        if (res.data) {
+          router.push('/');
+        } else {
+          setRenderable(true);
+        }
+      })
+      .catch(() => {
+        setRenderable(true);
+      });
+  }, []);
+
+  if (!renderable) {
+    return <Loading />;
+  }
   return (
     <div className={styles.loginContainer}>
       <StaticWebHeader />
@@ -30,9 +50,16 @@ const LoginPage: NextPage = () => {
             labelCol={{ span: 4 }}
             wrapperCol={{ span: 20 }}
             onFinish={async (data) => {
-              login(data).then((res) => {
+              login(data).then(() => {
                 message.success('登录成功');
-                router.push('/categories');
+                const { directUrl } = qs.parse(
+                  window.location.search.replace(/^\?/, ''),
+                );
+                router.push(
+                  directUrl
+                    ? decodeURIComponent(directUrl as string)
+                    : '/categories',
+                );
               });
             }}
           >
