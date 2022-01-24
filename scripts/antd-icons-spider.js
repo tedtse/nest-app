@@ -20,7 +20,7 @@ puppeteer.launch().then(async (browser) => {
   const iconsList = await page.evaluate(() => {
     const $iconsList = document.body.querySelectorAll('.anticons-list');
     return Array.prototype.slice.call($iconsList).map(($ul) => {
-      const $title = $ul.previousSibling;
+      const $title = $ul.previousElementSibling;
       const $antBadges = $ul.querySelectorAll('.ant-badge');
       return {
         title: $title.innerText,
